@@ -49,6 +49,9 @@ function build_checkout_email()
     $content['INTRO_DATE_TITLE'] = EMAIL_TEXT_DATE_ORDERED;
     $content['INTRO_DATE_ORDERED'] = strftime(DATE_FORMAT_LONG);
     $content['PRODUCTS_TITLE'] = EMAIL_TEXT_PRODUCTS;
+    $content['EMAIL_TEXT_TELEPHONE'] = EMAIL_TEXT_TELEPHONE;
+    $content['EMAIL_CUSTOMER_PHONE'] = $order->customer['telephone']; 
+    $content['EMAIL_ORDER_MESSAGE'] = EMAIL_ORDER_MESSAGE;
 
     // Order comments?
     $orders_history = $db->Execute("SELECT  * FROM  " .

@@ -48,6 +48,26 @@ if (!empty($action)) {
       $current_page_base = 'checkout_process'; 
       $module = 'checkout'; 
       $content = build_checkout_email(); 
+   } else if ($action == 'contact_us') {
+      $current_page_base = 'contact_us'; 
+      $module = 'contact_us'; 
+      $content = build_generic_email($module); 
+   } else if ($action == 'coupon') {
+      $current_page_base = 'coupon'; 
+      $module = 'coupon'; 
+      $content = build_coupon_email(); 
+   } else if ($action == 'default') {
+      $current_page_base = 'default'; 
+      $module = 'default'; 
+      $content = build_generic_email($module); 
+   } else if ($action == 'direct') {
+      $current_page_base = 'direct'; 
+      $module = 'direct'; 
+      $content = build_generic_email($module); 
+   } else if ($action == 'order_status') {
+      $current_page_base = 'order_status'; 
+      $module = 'order_status'; 
+      $content = build_order_status_email($module); 
    } else if ($action == 'back_in_stock') {
       $current_page_base = 'back_in_stock_notification'; 
       $module = 'back_in_stock_notification'; 
@@ -128,10 +148,23 @@ echo zen_hide_session_id();
 <div style="margin-left: 10px;">
 <?php 
 
-echo zen_draw_radio_field('action', 'welcome', false) . " " . WELCOME_EMAIL_NAME; 
-echo "<br />"; 
 echo zen_draw_radio_field('action', 'checkout', false) . " " . CHECKOUT_EMAIL_NAME; 
-echo "<br />"; 
+echo "<br /><br />"; 
+echo zen_draw_radio_field('action', 'contact_us', false) . " " . CONTACT_US_EMAIL_NAME; 
+echo "<br /><br />"; 
+echo zen_draw_radio_field('action', 'coupon', false) . " " . COUPON_EMAIL_NAME; 
+echo "<br /><br />"; 
+echo zen_draw_radio_field('action', 'default', false) . " " . DEFAULT_EMAIL_NAME; 
+echo "<br /><br />"; 
+echo zen_draw_radio_field('action', 'direct', false) . " " . DIRECT_EMAIL_NAME; 
+echo "<br /><br />"; 
+echo zen_draw_radio_field('action', 'order_status', false) . " " . ORDER_STATUS_EMAIL_NAME; 
+echo "<br /><br />"; 
+echo zen_draw_radio_field('action', 'welcome', false) . " " . WELCOME_EMAIL_NAME; 
+echo "<br /><br />"; 
+
+echo "<hr />"; 
+// Optional - based on add-ons 
 if (file_exists(DIR_FS_EMAIL_TEMPLATES . 'email_template_back_in_stock_notification.html')) {
    echo zen_draw_radio_field('action', 'back_in_stock', false) . " " . BACK_IN_STOCK_EMAIL_NAME; 
    echo "<br />"; 

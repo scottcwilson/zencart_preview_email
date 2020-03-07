@@ -1,6 +1,110 @@
 <?php
 define('PREVIEW_LOOKBACK_COUNT', '20');
 
+function build_generic_email($module)
+{
+    global $template, $template_dir, $current_page_base, $language_page_directory, $currencies, $db;
+
+    require(DIR_FS_CATALOG_MODULES . zen_get_module_directory('require_languages.php'));
+
+    $last_cust = $db->Execute("SELECT customers_firstname, customers_lastname, customers_email_address  FROM " . TABLE_CUSTOMERS . " ORDER BY customers_id DESC  LIMIT " . PREVIEW_LOOKBACK_COUNT);
+    $last_cust = preview_advance($last_cust);
+
+    $content['CONTACT_US_OFFICE_FROM'] = OFFICE_FROM . ' ' . $last_cust->fields['customers_firstname'] . " " . $last_cust->fields['customers_lastname'] . '<br />' . OFFICE_EMAIL . '(' . $last_cust->fields['customers_email_address'] . ')';
+    $content['EMAIL_FIRST_NAME'] = $last_cust->fields['customers_firstname']; 
+    $content['EMAIL_LAST_NAME'] = $last_cust->fields['customers_lastname']; 
+    $content['EMAIL_SUBJECT'] = "Subject Line";
+    if ($module == 'contact_us') { 
+       $content['EMAIL_MESSAGE_HTML'] = "Question from customer ... ";
+    } else if ($module == 'default') { 
+       $content['EMAIL_MESSAGE_HTML'] = "Default message ... ";
+    } else if ($module == 'direct') { 
+       $content['EMAIL_MESSAGE_HTML'] = "Direct message ... ";
+    }
+    return $content;
+}
+
+function build_coupon_email()
+{
+    global $template, $template_dir, $current_page_base, $language_page_directory, $currencies, $db;
+
+    require(DIR_FS_CATALOG_MODULES . zen_get_module_directory('require_languages.php'));
+    require(DIR_FS_ADMIN . DIR_WS_LANGUAGES . $_SESSION['language'] . '/coupon_admin.php'); 
+
+    $last_cust = $db->Execute("SELECT customers_firstname, customers_lastname, customers_email_address  FROM " . TABLE_CUSTOMERS . " ORDER BY customers_id DESC  LIMIT " . PREVIEW_LOOKBACK_COUNT);
+    $last_cust = preview_advance($last_cust);
+
+    $coupon_query = "SELECT coupon_name, coupon_description, coupon_code, coupon_start_date, coupon_expire_date, coupon_calc_base, coupon_is_valid_for_sales, coupon_product_count
+                                   FROM " . TABLE_COUPONS . " c, " . TABLE_COUPONS_DESCRIPTION . " cd WHERE c.coupon_id = cd.coupon_id "; 
+    $order = " ORDER BY c.coupon_id DESC LIMIT " . PREVIEW_LOOKBACK_COUNT; 
+    $coupon_result = $db->Execute($coupon_query . " AND coupon_active='Y'" . $order); 
+    if ($coupon_result->EOF) {
+       $coupon_result = $db->Execute($coupon_query . $order); 
+    }
+    if (!$coupon_result->EOF) {
+       $coupon_result = preview_advance($coupon_result);
+    }
+
+    $content['COUPON_TEXT_TO_REDEEM'] = TEXT_TO_REDEEM;
+    $content['COUPON_TEXT_VOUCHER_IS'] = TEXT_VOUCHER_IS;
+    $content['COUPON_CODE'] = $coupon_result->fields['coupon_code'] . $html_coupon_help;
+    $content['COUPON_DESCRIPTION'] =(!empty($coupon_result->fields['coupon_description']) ? $coupon_result->fields['coupon_description'] : '');
+    $content['COUPON_TEXT_REMEMBER']  = TEXT_REMEMBER;
+    $content['COUPON_REDEEM_STORENAME_URL'] = sprintf(TEXT_VISIT ,'<a href="'.HTTP_CATALOG_SERVER . DIR_WS_CATALOG.'">'.STORE_NAME.'</a>');
+    $content['CONTACT_US_OFFICE_FROM'] = OFFICE_FROM . ' ' . $last_cust->fields['customers_firstname'] . " " . $last_cust->fields['customers_lastname'] . '<br />' . OFFICE_EMAIL . '(' . $last_cust->fields['customers_email_address'] . ')';
+    $message = "This is a test message about a coupon"; 
+    $content['EMAIL_MESSAGE_HTML'] = $message; 
+    $content['EMAIL_FIRST_NAME'] = $last_cust->fields['customers_firstname']; 
+    $content['EMAIL_LAST_NAME'] = $last_cust->fields['customers_lastname']; 
+    return $content;
+}
+
+function build_order_status_email($module)
+{
+    global $template, $template_dir, $current_page_base, $language_page_directory, $currencies, $db;
+
+    require(DIR_FS_CATALOG_MODULES . zen_get_module_directory('require_languages.php'));
+    require(DIR_FS_ADMIN . DIR_WS_LANGUAGES . $_SESSION['language'] . '/orders.php'); 
+
+    $order_query = "SELECT o.orders_id, customers_name, date_purchased, COUNT(osh.orders_id) AS count FROM " . TABLE_ORDERS . " o LEFT JOIN " . TABLE_ORDERS_STATUS_HISTORY . " osh ON o.orders_id = osh.orders_id GROUP BY o.orders_id HAVING count > 2 ORDER BY o.orders_id DESC LIMIT " . PREVIEW_LOOKBACK_COUNT; 
+    $order_list = $db->Execute($order_query); 
+    $order_list = preview_advance($order_list);
+
+    $orders_id = $order_list->fields['orders_id'];
+    $osh_list = $db->Execute("SELECT * FROM " . TABLE_ORDERS_STATUS_HISTORY . " WHERE orders_id = " . $orders_id . " ORDER BY orders_status_history_id DESC LIMIT 2"); 
+
+    $orders_current_status = $osh_list->fields['orders_status_id']; 
+    $osh_list->MoveNext(); 
+    $orders_new_status = $osh_list->fields['orders_status_id']; 
+
+    $new_orders_status_name = zen_get_orders_status_name($orders_new_status);
+    if ($new_orders_status_name == '') {
+       $new_orders_status_name = 'N/A';
+    }
+    $email_message = $osh_list->fields['comments']; 
+
+    if ($orders_new_status != $orders_current_status) {
+        $status_text = OSH_EMAIL_TEXT_STATUS_UPDATED;
+        $status_value_text = sprintf(OSH_EMAIL_TEXT_STATUS_CHANGE, zen_get_orders_status_name($orders_current_status), $new_orders_status_name);
+    } else {
+        $status_text = OSH_EMAIL_TEXT_STATUS_NO_CHANGE;
+        $status_value_text = sprintf(OSH_EMAIL_TEXT_STATUS_LABEL, $new_orders_status_name);
+    }
+    $new_orders_status_name = zen_get_orders_status_name($orders_new_status);
+    $content['EMAIL_CUSTOMERS_NAME']    = $order_list->fields['customers_name'];
+    $content['EMAIL_TEXT_ORDER_NUMBER'] = OSH_EMAIL_TEXT_ORDER_NUMBER . ' ' . $orders_id;
+    $content['EMAIL_TEXT_INVOICE_URL']  = '<a href="' . zen_catalog_href_link(FILENAME_CATALOG_ACCOUNT_HISTORY_INFO, "order_id=$orders_id", 'SSL') .'">' . str_replace(':', '', OSH_EMAIL_TEXT_INVOICE_URL) . '</a>';
+    $content['EMAIL_TEXT_DATE_ORDERED'] = OSH_EMAIL_TEXT_DATE_ORDERED . ' ' . zen_date_long($order_list->fields['date_purchased']);
+    $content['EMAIL_TEXT_STATUS_COMMENTS'] = nl2br($email_message);
+    $content['EMAIL_TEXT_STATUS_UPDATED'] = str_replace("\n", '', $status_text);
+    $content['EMAIL_TEXT_STATUS_LABEL'] = str_replace("\n", '', $status_value_text);
+    $content['EMAIL_TEXT_NEW_STATUS'] = $new_orders_status_name;
+    $content['EMAIL_TEXT_STATUS_PLEASE_REPLY'] = str_replace("\n", '', OSH_EMAIL_TEXT_STATUS_PLEASE_REPLY);
+    $content['EMAIL_PAYPAL_TRANSID'] = '';
+
+    return $content;
+}
+
 function build_welcome_email()
 {
     global $template, $template_dir, $current_page_base, $language_page_directory, $currencies, $db;
@@ -325,10 +429,10 @@ function build_abandoned_cart_base_email()
 
     $custname = $basket->fields['fname'] . " " . $basket->fields['lname'];
     $outEmailAddr = '"' . $custname . '" <' . $basket->fields['email'] . '>';
-    $content['EMAIL_MESSAGE_HTML'] = nl2br($email) . zen_db_prepare_input($_POST['message_html']);
-    $email = strip_tags($email . "\n\n" . zen_db_prepare_input($_POST['message']));
-
-//                   '<table border="0" width="100%" cellspacing="0" cellpadding="2"> ' . $html. ' </table>';
+    $message_html = "This is a <b>test message</b>";
+    $message = "This is a test message"; 
+    $content['EMAIL_MESSAGE_HTML'] = nl2br($email) . zen_db_prepare_input($message_html);
+    $email = strip_tags($email . "\n\n" . zen_db_prepare_input($message));
 
     $content['EMAIL_SUBJECT'] = EMAIL_TEXT_SUBJECT;
 

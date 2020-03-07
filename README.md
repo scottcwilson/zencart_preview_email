@@ -30,8 +30,15 @@ Additional screenshots are available on my [my website](https://www.thatsoftware
 - Copy the contents of the unzipped folder to the root directory of your shop.
 - Run the preview_email.sql file against your database, using Admin->Tools->Install SQL Patches.
 
-At this time, the following emails are supported:
-- Welcome
+The following native Zen Cart emails are supported:
 - Checkout
-- Abandoned Cart (Note: [additional changes required](https://www.thatsoftwareguy.com/zencart_preview_email.html#abandoned_cart_changes))
+- Contact Us
+- Coupon
+- Default
+- Direct
+- Order Status
+- Welcome
 
+Also some emails based on mods:
+- Abandoned Cart (Note: [additional changes required](https://www.thatsoftwareguy.com/zencart_preview_email.html#abandoned_cart_changes))
+- Back in Stock 

@@ -36,7 +36,12 @@ The following native Zen Cart emails are supported:
 - Coupon
 - Default
 - Direct
+- GV Mail
+- GV Queue
+- GV Send
 - Order Status
+- Password Forgotten
+- Product Notification
 - Welcome
 
 Also some emails based on mods:

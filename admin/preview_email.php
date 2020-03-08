@@ -39,12 +39,7 @@ require_once(DIR_FS_CATALOG_LANGUAGES. $_SESSION['language'] . '/' . $template_d
 
 $action = $_POST['action']; 
 if (!empty($action)) {
-   if ($action == "welcome") { 
-      // Welcome email
-      $current_page_base = 'create_account'; 
-      $module = 'welcome';
-      $content = build_welcome_email(); 
-   } else if ($action == 'checkout') {
+   if ($action == 'checkout') {
       $current_page_base = 'checkout_process'; 
       $module = 'checkout'; 
       $content = build_checkout_email(); 
@@ -64,10 +59,34 @@ if (!empty($action)) {
       $current_page_base = 'direct'; 
       $module = 'direct'; 
       $content = build_generic_email($module); 
+   } else if ($action == 'gv_queue') {
+      $current_page_base = 'gv_queue'; 
+      $module = 'gv_queue'; 
+      $content = build_gv_email($module); 
+   } else if ($action == 'gv_mail') {
+      $current_page_base = 'gv_mail'; 
+      $module = 'gv_mail'; 
+      $content = build_gv_email($module); 
+   } else if ($action == 'gv_send') {
+      $current_page_base = 'gv_send'; 
+      $module = 'gv_send'; 
+      $content = build_gv_email($module); 
    } else if ($action == 'order_status') {
       $current_page_base = 'order_status'; 
       $module = 'order_status'; 
       $content = build_order_status_email($module); 
+   } else if ($action == 'product_notification') {
+      $current_page_base = 'product_notification'; 
+      $module = 'product_notification'; 
+      $content = build_generic_email($module); 
+   } else if ($action == 'password_forgotten') {
+      $current_page_base = 'password_forgotten'; 
+      $module = 'password_forgotten'; 
+      $content = build_generic_email($module); 
+   } else if ($action == "welcome") { 
+      $current_page_base = 'create_account'; 
+      $module = 'welcome';
+      $content = build_welcome_email(); 
    } else if ($action == 'back_in_stock') {
       $current_page_base = 'back_in_stock_notification'; 
       $module = 'back_in_stock_notification'; 
@@ -158,7 +177,19 @@ echo zen_draw_radio_field('action', 'default', false) . " " . DEFAULT_EMAIL_NAME
 echo "<br /><br />"; 
 echo zen_draw_radio_field('action', 'direct', false) . " " . DIRECT_EMAIL_NAME; 
 echo "<br /><br />"; 
+if (defined('MODULE_ORDER_TOTAL_GV_STATUS') && MODULE_ORDER_TOTAL_GV_STATUS == 'true') {
+   echo zen_draw_radio_field('action', 'gv_mail', false) . " " . GV_MAIL_EMAIL_NAME; 
+   echo "<br /><br />"; 
+   echo zen_draw_radio_field('action', 'gv_queue', false) . " " . GV_QUEUE_EMAIL_NAME; 
+   echo "<br /><br />"; 
+   echo zen_draw_radio_field('action', 'gv_send', false) . " " . GV_SEND_EMAIL_NAME; 
+   echo "<br /><br />"; 
+}
 echo zen_draw_radio_field('action', 'order_status', false) . " " . ORDER_STATUS_EMAIL_NAME; 
+echo "<br /><br />"; 
+echo zen_draw_radio_field('action', 'password_forgotten', false) . " " . PASSWORD_FORGOTTEN_EMAIL_NAME; 
+echo "<br /><br />"; 
+echo zen_draw_radio_field('action', 'product_notification', false) . " " . PRODUCT_NOTIFICATION_EMAIL_NAME ; 
 echo "<br /><br />"; 
 echo zen_draw_radio_field('action', 'welcome', false) . " " . WELCOME_EMAIL_NAME; 
 echo "<br /><br />"; 

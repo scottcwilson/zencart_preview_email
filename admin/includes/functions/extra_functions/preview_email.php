@@ -7,20 +7,96 @@ function build_generic_email($module)
 
     require(DIR_FS_CATALOG_MODULES . zen_get_module_directory('require_languages.php'));
 
-    $last_cust = $db->Execute("SELECT customers_firstname, customers_lastname, customers_email_address  FROM " . TABLE_CUSTOMERS . " ORDER BY customers_id DESC  LIMIT " . PREVIEW_LOOKBACK_COUNT);
+    $last_cust = $db->Execute("SELECT customers_firstname, customers_lastname, customers_email_address  FROM " . TABLE_CUSTOMERS . " ORDER BY customers_id DESC LIMIT " . PREVIEW_LOOKBACK_COUNT);
     $last_cust = preview_advance($last_cust);
 
     $content['CONTACT_US_OFFICE_FROM'] = OFFICE_FROM . ' ' . $last_cust->fields['customers_firstname'] . " " . $last_cust->fields['customers_lastname'] . '<br />' . OFFICE_EMAIL . '(' . $last_cust->fields['customers_email_address'] . ')';
     $content['EMAIL_FIRST_NAME'] = $last_cust->fields['customers_firstname']; 
     $content['EMAIL_LAST_NAME'] = $last_cust->fields['customers_lastname']; 
-    $content['EMAIL_SUBJECT'] = "Subject Line";
+    $content['EMAIL_SUBJECT'] = PREVIEW_SUBJECT_LINE; 
     if ($module == 'contact_us') { 
-       $content['EMAIL_MESSAGE_HTML'] = "Question from customer ... ";
+       $content['EMAIL_MESSAGE_HTML'] = PREVIEW_CONTACT_US_MSG; 
     } else if ($module == 'default') { 
-       $content['EMAIL_MESSAGE_HTML'] = "Default message ... ";
+       $content['EMAIL_MESSAGE_HTML'] = PREVIEW_DEFAULT_MSG; 
     } else if ($module == 'direct') { 
-       $content['EMAIL_MESSAGE_HTML'] = "Direct message ... ";
+       $content['EMAIL_MESSAGE_HTML'] = PREVIEW_DIRECT_MSG; 
+    } else if ($module == 'product_notification') { 
+       $content['EMAIL_MESSAGE_HTML'] = PREVIEW_PRODUCT_NOTIFICATION_MSG; 
+    } else if ($module == 'password_forgotten') { 
+       $new_password = zen_create_PADSS_password( (ENTRY_PASSWORD_MIN_LENGTH > 0 ? ENTRY_PASSWORD_MIN_LENGTH : 5) );
+       $crypted_password = zen_encrypt_password($new_password);
+       $content['EMAIL_MESSAGE_HTML'] = sprintf(EMAIL_PASSWORD_REMINDER_BODY, $new_password); 
+       $content['EMAIL_CUSTOMERS_NAME'] = $last_cust->fields['customers_firstname'] .  " " . $last_cust->fields['customers_lastname']; 
+       $content['EMAIL_SUBJECT'] = EMAIL_PASSWORD_REMINDER_SUBJECT; 
     }
+    return $content;
+}
+
+function build_gv_email($module)
+{
+    global $template, $template_dir, $current_page_base, $language_page_directory, $currencies, $db;
+
+    // GV_FAQ only defined on catalog side. Fix 
+    define('GV_FAQ', TEXT_GV_NAME . ' FAQ'); 
+    require(DIR_FS_CATALOG_MODULES . zen_get_module_directory('require_languages.php'));
+
+    if ($module == "gv_queue") { 
+       require(DIR_FS_ADMIN . DIR_WS_LANGUAGES . $_SESSION['language'] . '/gv_queue.php'); 
+    } else if ($module == "gv_mail") {
+       require(DIR_FS_ADMIN . DIR_WS_LANGUAGES . $_SESSION['language'] . '/gv_mail.php'); 
+    } else if ($module == "gv_send") {
+      require(DIR_FS_CATALOG_LANGUAGES . $_SESSION['language'] . '/gv_send.php'); 
+    }
+
+    $last_cust = $db->Execute("SELECT customers_firstname, customers_lastname, customers_email_address  FROM " . TABLE_CUSTOMERS . " ORDER BY customers_id DESC LIMIT " . PREVIEW_LOOKBACK_COUNT);
+    $last_cust = preview_advance($last_cust);
+
+    $content['EMAIL_FIRST_NAME'] = $last_cust->fields['customers_firstname']; 
+    $content['EMAIL_LAST_NAME'] = $last_cust->fields['customers_lastname']; 
+
+    if ($module == "gv_queue") { 
+       $content['GV_NOTICE_HEADER']  = TEXT_REDEEM_GV_MESSAGE_HEADER;
+       $content['GV_NOTICE_RELEASED']  = TEXT_REDEEM_GV_MESSAGE_RELEASED;
+       $content['GV_NOTICE_AMOUNT_REDEEM'] = sprintf(TEXT_REDEEM_GV_MESSAGE_AMOUNT, '<strong>' . $currencies->format($gv_amount) . '</strong>');
+       $content['GV_NOTICE_VALUE'] = $currencies->format($gv_amount);
+       $content['GV_NOTICE_THANKS'] = TEXT_REDEEM_GV_MESSAGE_THANKS;
+       $content['TEXT_REDEEM_GV_MESSAGE_BODY'] = TEXT_REDEEM_GV_MESSAGE_BODY;
+       $content['TEXT_REDEEM_GV_MESSAGE_FOOTER'] = TEXT_REDEEM_GV_MESSAGE_FOOTER;
+    } else if ($module == "gv_mail") {
+      $amount = 1.00;
+      $content['EMAIL_MESSAGE_HTML'] = PREVIEW_GV_MAIL_MSG; 
+      $content['GV_WORTH']  = TEXT_GV_WORTH;
+      $content['GV_AMOUNT']  = $currencies->format($amount);
+      $content['GV_REDEEM'] = TEXT_TO_REDEEM . TEXT_WHICH_IS . ' <strong>' . $id1 . '</strong> ' . TEXT_IN_CASE;
+      $content['GV_CODE_URL'] .= TEXT_OR_VISIT .  '<a href="' . HTTP_CATALOG_SERVER . DIR_WS_CATALOG.'">' . STORE_NAME . '</a>' . TEXT_ENTER_CODE;
+    } else if ($module == "gv_send") {
+      $id1 = "abcdef12345"; 
+      $amount = 1.00; 
+      $to_name = "John Doe";
+      $message = PREVIEW_GV_SEND_MESSAGE; 
+      $content['EMAIL_GV_TEXT_HEADER'] =  sprintf(EMAIL_GV_TEXT_HEADER, '');
+      $content['EMAIL_GV_AMOUNT'] =  $currencies->format($amount, false);
+      $content['EMAIL_GV_FROM'] =  sprintf(EMAIL_GV_FROM, $send_name) ;
+
+      $gv_email .= EMAIL_GV_MESSAGE . "\n\n";
+      $content['EMAIL_GV_MESSAGE'] = EMAIL_GV_MESSAGE . '<br />';
+
+      if (isset($to_name)) {
+         $gv_email .= sprintf(EMAIL_GV_SEND_TO, $to_name) . "\n\n";
+         $content['EMAIL_GV_SEND_TO'] = '<tt>'.sprintf(EMAIL_GV_SEND_TO, $to_name). '</tt><br />';
+      }
+      $gv_email .= stripslashes($message) . "\n\n";
+      $gv_email .= EMAIL_SEPARATOR . "\n\n";
+      $content['EMAIL_MESSAGE_HTML'] = stripslashes($message);
+
+      $content['GV_REDEEM_HOW'] = sprintf(EMAIL_GV_REDEEM, '<strong>' . $id1 . '</strong>');
+      $content['GV_REDEEM_URL'] = '<a href="'.zen_href_link(FILENAME_GV_REDEEM, 'gv_no=' . $id1, 'NONSSL', false).'">'.EMAIL_GV_LINK.'</a>';
+      $content['GV_REDEEM_CODE'] = $id1;
+
+      $content['EMAIL_GV_FIXED_FOOTER'] = str_replace(array("\r\n", "\n", "\r", "-----"), '', EMAIL_GV_FIXED_FOOTER);
+      $content['EMAIL_GV_SHOP_FOOTER'] =	EMAIL_GV_SHOP_FOOTER;
+    }
+
     return $content;
 }
 
@@ -31,7 +107,7 @@ function build_coupon_email()
     require(DIR_FS_CATALOG_MODULES . zen_get_module_directory('require_languages.php'));
     require(DIR_FS_ADMIN . DIR_WS_LANGUAGES . $_SESSION['language'] . '/coupon_admin.php'); 
 
-    $last_cust = $db->Execute("SELECT customers_firstname, customers_lastname, customers_email_address  FROM " . TABLE_CUSTOMERS . " ORDER BY customers_id DESC  LIMIT " . PREVIEW_LOOKBACK_COUNT);
+    $last_cust = $db->Execute("SELECT customers_firstname, customers_lastname, customers_email_address  FROM " . TABLE_CUSTOMERS . " ORDER BY customers_id DESC LIMIT " . PREVIEW_LOOKBACK_COUNT);
     $last_cust = preview_advance($last_cust);
 
     $coupon_query = "SELECT coupon_name, coupon_description, coupon_code, coupon_start_date, coupon_expire_date, coupon_calc_base, coupon_is_valid_for_sales, coupon_product_count
@@ -52,7 +128,7 @@ function build_coupon_email()
     $content['COUPON_TEXT_REMEMBER']  = TEXT_REMEMBER;
     $content['COUPON_REDEEM_STORENAME_URL'] = sprintf(TEXT_VISIT ,'<a href="'.HTTP_CATALOG_SERVER . DIR_WS_CATALOG.'">'.STORE_NAME.'</a>');
     $content['CONTACT_US_OFFICE_FROM'] = OFFICE_FROM . ' ' . $last_cust->fields['customers_firstname'] . " " . $last_cust->fields['customers_lastname'] . '<br />' . OFFICE_EMAIL . '(' . $last_cust->fields['customers_email_address'] . ')';
-    $message = "This is a test message about a coupon"; 
+    $message = PREVIEW_COUPON_MSG; 
     $content['EMAIL_MESSAGE_HTML'] = $message; 
     $content['EMAIL_FIRST_NAME'] = $last_cust->fields['customers_firstname']; 
     $content['EMAIL_LAST_NAME'] = $last_cust->fields['customers_lastname']; 
@@ -111,7 +187,7 @@ function build_welcome_email()
 
     require(DIR_FS_CATALOG_MODULES . zen_get_module_directory('require_languages.php'));
 
-    $last_cust = $db->Execute("SELECT customers_firstname, customers_lastname FROM " . TABLE_CUSTOMERS . " ORDER BY customers_id DESC  LIMIT " . PREVIEW_LOOKBACK_COUNT);
+    $last_cust = $db->Execute("SELECT customers_firstname, customers_lastname FROM " . TABLE_CUSTOMERS . " ORDER BY customers_id DESC LIMIT " . PREVIEW_LOOKBACK_COUNT);
     $last_cust = preview_advance($last_cust);
 
     $content['EMAIL_SUBJECT'] = EMAIL_SUBJECT;
@@ -129,7 +205,7 @@ function build_checkout_email()
 
     require(DIR_FS_CATALOG_MODULES . zen_get_module_directory('require_languages.php'));
 
-    $last_order = $db->Execute("SELECT orders_id FROM " . TABLE_ORDERS . " ORDER BY orders_id DESC  LIMIT " . PREVIEW_LOOKBACK_COUNT);
+    $last_order = $db->Execute("SELECT orders_id FROM " . TABLE_ORDERS . " ORDER BY orders_id DESC LIMIT " . PREVIEW_LOOKBACK_COUNT);
     $last_order = preview_advance($last_order);
     $oID = $last_order->fields['orders_id'];
     $content['EMAIL_SUBJECT'] = EMAIL_TEXT_SUBJECT . EMAIL_ORDER_NUMBER_SUBJECT . $oID;

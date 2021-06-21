@@ -11,6 +11,7 @@ function build_generic_email($module)
     $last_cust = preview_advance($last_cust);
 
     $content['CONTACT_US_OFFICE_FROM'] = OFFICE_FROM . ' ' . $last_cust->fields['customers_firstname'] . " " . $last_cust->fields['customers_lastname'] . '<br />' . OFFICE_EMAIL . '(' . $last_cust->fields['customers_email_address'] . ')';
+    $content['EMAIL_SALUTATION'] = EMAIL_SALUTATION; 
     $content['EMAIL_FIRST_NAME'] = $last_cust->fields['customers_firstname']; 
     $content['EMAIL_LAST_NAME'] = $last_cust->fields['customers_lastname']; 
     $content['EMAIL_SUBJECT'] = PREVIEW_SUBJECT_LINE; 
@@ -30,6 +31,24 @@ function build_generic_email($module)
        $content['EMAIL_SUBJECT'] = EMAIL_PASSWORD_REMINDER_SUBJECT; 
     }
     return $content;
+}
+
+function build_direct_email($module)
+{
+   $content = build_generic_email($module);
+   $content['EMAIL_MESSAGE_HTML'] = PREVIEW_DIRECT_MSG; 
+   if (file_exists(PREVIEW_TEST_DIRECT_FILE)) { 
+      @ $cust_mail_file = fopen(PREVIEW_TEST_DIRECT_FILE, 'r'); 
+      if ($cust_mail_file) { 
+         $cust_mail = '';
+         while (!feof($cust_mail_file)) {
+            $cust_mail .= fgets($cust_mail_file, 999);
+         }
+         @fclose($cust_mail_file); 
+         $content['EMAIL_MESSAGE_HTML'] = $cust_mail; 
+      }
+   }
+   return $content;
 }
 
 function build_gv_email($module)
@@ -288,7 +307,9 @@ function build_checkout_email()
     return $content;
 }
 
-function build_back_in_stock_email()
+// For Back in Stock plugin
+// https://www.zen-cart.com/downloads.php?do=file&id=1944
+function build_back_in_stock_email_larry()
 {
     global $template, $template_dir, $current_page_base, $language_page_directory, $db, $currencies;
 
@@ -312,6 +333,37 @@ function build_back_in_stock_email()
     $content['PRODUCT_IMAGE'] = '<img style="max-width:100%;" src="' . HTTPS_SERVER . DIR_WS_HTTPS_CATALOG . DIR_WS_IMAGES . $products_image . '" alt="' . $content['PRODUCT_NAME'] . '">';
     $content['PRODUCT_LINK'] = zen_catalog_href_link('product_info', 'products_id=' . $product_id);
     $content['BOTTOM_MESSAGE'] = BACK_IN_STOCK_MAIL_BOTTOM;
+    return $content;
+}
+
+// For Back in Stock plugin 
+// https://www.zen-cart.com/downloads.php?do=file&id=773 
+function build_back_in_stock_email_ceon()
+{
+    global $template, $template_dir, $current_page_base, $language_page_directory, $db, $currencies;
+
+    require(DIR_FS_CATALOG_MODULES . zen_get_module_directory('require_languages.php'));
+    // Pull from admin 
+    include "includes/languages/english/back_in_stock_notifications.php";
+    include $language_page_directory . "/extra_definitions/back_in_stock_notifications.php";
+
+    $bis_product_query = $db->Execute("SELECT products_id FROM " . TABLE_PRODUCTS . " WHERE products_status = 1 ORDER BY products_last_modified DESC LIMIT " . PREVIEW_LOOKBACK_COUNT);
+    $bis_product_query = preview_advance($bis_product_query);
+    $product_id = $bis_product_query->fields['products_id'];
+    $content['EMAIL_GREETING'] = "Mr. Prospect";
+    $content['EMAIL_INTRO_1'] = EMAIL_INTRO_SINGULAR1; 
+    $content['EMAIL_INTRO_2'] = EMAIL_INTRO_SINGULAR2; 
+    $content['PRODUCTS_DETAIL_TITLE'] = PRODUCTS_DETAIL_TITLE_SINGULAR; 
+    $html_msg = ''; 
+	 $html_msg .= '<p class="BackInStockNotificationProduct">' . '<a href="' .
+					zen_catalog_href_link('product_info', 'products_id=' .
+					$product_id) . '" target="_blank">' .
+					htmlentities(zen_get_products_name($product_id), ENT_COMPAT, CHARSET) .
+					'</a></p>' . "\n";
+    $content['PRODUCTS_DETAIL'] = 
+		'<table class="product-details" border="0" width="100%" cellspacing="0" cellpadding="2">' .
+		$html_msg . '</table>';
+	
     return $content;
 }
 

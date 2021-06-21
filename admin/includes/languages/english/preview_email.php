@@ -31,6 +31,8 @@ define('PREVIEW_DIRECT_MSG', 'Direct message ... ');
 define('PREVIEW_GV_MAIL_MSG', 'GV Mail message ... ');
 define('PREVIEW_GV_SEND_MESSAGE', 'GV Send message ...'); 
 define('PREVIEW_PRODUCT_NOTIFICATION_MSG', 'Product notification message ... ');
+define('PREVIEW_TEST_DIRECT_FILE','../direct_test.html'); 
+define('PREVIEW_DIRECT_MSG', 'Create a file called ' . PREVIEW_TEST_DIRECT_FILE . ' at the top level of the cart to test ... ');
 define('PREVIEW_COUPON_MSG', 'This is a test message about a coupon');
 define('PREVIEW_SUBJECT_LINE', 'Subject Line');
 

@@ -57,8 +57,8 @@ if (!empty($action)) {
       $content = build_generic_email($module); 
    } else if ($action == 'direct') {
       $current_page_base = 'direct'; 
-      $module = 'direct'; 
-      $content = build_generic_email($module); 
+      $module = 'direct_email'; 
+      $content = build_direct_email($module); 
    } else if ($action == 'gv_queue') {
       $current_page_base = 'gv_queue'; 
       $module = 'gv_queue'; 
@@ -90,7 +90,11 @@ if (!empty($action)) {
    } else if ($action == 'back_in_stock') {
       $current_page_base = 'back_in_stock_notification'; 
       $module = 'back_in_stock_notification'; 
-      $content = build_back_in_stock_email(); 
+      if (file_exists('includes/classes/class.CeonBISNInstallOrUpgrade.php')) { 
+      $content = build_back_in_stock_email_ceon(); 
+      } else {
+         $content = build_back_in_stock_email_larry(); 
+      }
    } else if ($action == 'abandoned_cart_base') {
       $current_page_base = 'recover_cart_sales'; 
       $module = 'recover_cart_sales'; 

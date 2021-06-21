@@ -91,7 +91,7 @@ if (!empty($action)) {
       $current_page_base = 'back_in_stock_notification'; 
       $module = 'back_in_stock_notification'; 
       if (file_exists('includes/classes/class.CeonBISNInstallOrUpgrade.php')) { 
-      $content = build_back_in_stock_email_ceon(); 
+         $content = build_back_in_stock_email_ceon(); 
       } else {
          $content = build_back_in_stock_email_larry(); 
       }

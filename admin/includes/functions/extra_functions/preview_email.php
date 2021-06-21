@@ -314,8 +314,7 @@ function build_back_in_stock_email_larry()
     global $template, $template_dir, $current_page_base, $language_page_directory, $db, $currencies;
 
     require(DIR_FS_CATALOG_MODULES . zen_get_module_directory('require_languages.php'));
-    require($language_page_directory . "/extra_definitions/back_in_stock.php");
-
+    include $language_page_directory . "/extra_definitions/back_in_stock.php";
     $bis_product_query = $db->Execute("SELECT products_id FROM " . TABLE_PRODUCTS . " WHERE products_status = 1 ORDER BY products_last_modified DESC LIMIT " . PREVIEW_LOOKBACK_COUNT);
     $bis_product_query = preview_advance($bis_product_query);
     $product_id = $bis_product_query->fields['products_id'];
@@ -345,6 +344,7 @@ function build_back_in_stock_email_ceon()
     require(DIR_FS_CATALOG_MODULES . zen_get_module_directory('require_languages.php'));
     // Pull from admin 
     include "includes/languages/english/back_in_stock_notifications.php";
+    // Pull from storefront 
     include $language_page_directory . "/extra_definitions/back_in_stock_notifications.php";
 
     $bis_product_query = $db->Execute("SELECT products_id FROM " . TABLE_PRODUCTS . " WHERE products_status = 1 ORDER BY products_last_modified DESC LIMIT " . PREVIEW_LOOKBACK_COUNT);

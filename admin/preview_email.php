@@ -28,7 +28,20 @@ if (!function_exists('zen_get_module_directory')) {
 
 // basic settings for all emails 
 $language_page_directory = DIR_FS_CATALOG_LANGUAGES . $_SESSION['language'] . '/';
-$common['EMAIL_COMMON_CSS'] = file_get_contents (DIR_FS_EMAIL_TEMPLATES . $css_lang_folder . 'email_common.css');
+
+$common['EMAIL_COMMON_CSS'] = '';
+
+$langfolder = (strtolower($_SESSION['languages_code']) == 'en') ? '' : strtolower($_SESSION['languages_code']) . '/';
+$filesToTest = array(
+    DIR_FS_EMAIL_TEMPLATES . $langfolder . 'email_common.css',
+    DIR_FS_EMAIL_TEMPLATES . 'email_common.css'
+);
+foreach($filesToTest as $val) {
+    if (file_exists($val)) {
+        $common['EMAIL_COMMON_CSS'] = file_get_contents ($val);
+        break;
+    }
+}
 
 if (file_exists(DIR_FS_CATALOG_LANGUAGES. $_SESSION['language'] . '/' . $template_dir . '/' . FILENAME_EMAIL_EXTRAS)) {
   $template_dir_select = $template_dir . '/';
@@ -37,7 +50,7 @@ if (file_exists(DIR_FS_CATALOG_LANGUAGES. $_SESSION['language'] . '/' . $templat
 }
 require_once(DIR_FS_CATALOG_LANGUAGES. $_SESSION['language'] . '/' . $template_dir_select . FILENAME_EMAIL_EXTRAS);
 
-$action = $_POST['action']; 
+$action = (!empty($_POST['action']) ? $_POST['action'] : ''); 
 if (!empty($action)) {
    if ($action == 'checkout') {
       $current_page_base = 'checkout_process'; 

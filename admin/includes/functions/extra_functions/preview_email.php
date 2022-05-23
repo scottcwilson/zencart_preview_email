@@ -14,6 +14,7 @@ function build_generic_email($module)
     $content['EMAIL_SALUTATION'] = EMAIL_SALUTATION; 
     $content['EMAIL_FIRST_NAME'] = $last_cust->fields['customers_firstname']; 
     $content['EMAIL_LAST_NAME'] = $last_cust->fields['customers_lastname']; 
+    $content['EMAIL_TO_ADDRESS'] = $last_cust->fields['customers_email_address']; 
     $content['EMAIL_SUBJECT'] = PREVIEW_SUBJECT_LINE; 
     if ($module == 'contact_us') { 
        $content['EMAIL_MESSAGE_HTML'] = PREVIEW_CONTACT_US_MSG; 
@@ -70,10 +71,13 @@ function build_gv_email($module)
     $last_cust = $db->Execute("SELECT customers_firstname, customers_lastname, customers_email_address  FROM " . TABLE_CUSTOMERS . " ORDER BY customers_id DESC LIMIT " . PREVIEW_LOOKBACK_COUNT);
     $last_cust = preview_advance($last_cust);
 
+    $content['EMAIL_SALUTATION'] = EMAIL_SALUTATION; 
     $content['EMAIL_FIRST_NAME'] = $last_cust->fields['customers_firstname']; 
     $content['EMAIL_LAST_NAME'] = $last_cust->fields['customers_lastname']; 
+    $content['EMAIL_TO_ADDRESS'] = $last_cust->fields['customers_email_address']; 
 
     if ($module == "gv_queue") { 
+       $gv_amount = 1.00;
        $content['GV_NOTICE_HEADER']  = TEXT_REDEEM_GV_MESSAGE_HEADER;
        $content['GV_NOTICE_RELEASED']  = TEXT_REDEEM_GV_MESSAGE_RELEASED;
        $content['GV_NOTICE_AMOUNT_REDEEM'] = sprintf(TEXT_REDEEM_GV_MESSAGE_AMOUNT, '<strong>' . $currencies->format($gv_amount) . '</strong>');
@@ -82,22 +86,33 @@ function build_gv_email($module)
        $content['TEXT_REDEEM_GV_MESSAGE_BODY'] = TEXT_REDEEM_GV_MESSAGE_BODY;
        $content['TEXT_REDEEM_GV_MESSAGE_FOOTER'] = TEXT_REDEEM_GV_MESSAGE_FOOTER;
     } else if ($module == "gv_mail") {
+      $id1 = "abcdef12345"; 
       $amount = 1.00;
+      $gv_value = 1.00;
       $content['EMAIL_MESSAGE_HTML'] = PREVIEW_GV_MAIL_MSG; 
-      $content['GV_WORTH']  = TEXT_GV_WORTH;
+      if (defined('TEXT_GV_WORTH')) { 
+         $content['GV_WORTH']  = TEXT_GV_WORTH;
+      }
       $content['GV_AMOUNT']  = $currencies->format($amount);
-      $content['GV_REDEEM'] = TEXT_TO_REDEEM . TEXT_WHICH_IS . ' <strong>' . $id1 . '</strong> ' . TEXT_IN_CASE;
-      $content['GV_CODE_URL'] .= TEXT_OR_VISIT .  '<a href="' . HTTP_CATALOG_SERVER . DIR_WS_CATALOG.'">' . STORE_NAME . '</a>' . TEXT_ENTER_CODE;
+      $content['GV_ANNOUNCE'] = sprintf(TEXT_GV_ANNOUNCE, $gv_value);
+
+      if (SEARCH_ENGINE_FRIENDLY_URLS == 'true') {
+         $url = HTTP_CATALOG_SERVER . DIR_WS_CATALOG . 'index.php/gv_redeem/gv_no/'; 
+      } else {
+         $url = HTTP_CATALOG_SERVER . DIR_WS_CATALOG . 'index.php?main_page=gv_redeem&gv_no='; 
+      }
+      $content['GV_REDEEM'] = sprintf(TEXT_GV_TO_REDEEM_HTML, $url, $id1);
     } else if ($module == "gv_send") {
       $id1 = "abcdef12345"; 
       $amount = 1.00; 
       $to_name = "John Doe";
+      $send_name = "Generous George";
       $message = PREVIEW_GV_SEND_MESSAGE; 
       $content['EMAIL_GV_TEXT_HEADER'] =  sprintf(EMAIL_GV_TEXT_HEADER, '');
       $content['EMAIL_GV_AMOUNT'] =  $currencies->format($amount, false);
       $content['EMAIL_GV_FROM'] =  sprintf(EMAIL_GV_FROM, $send_name) ;
 
-      $gv_email .= EMAIL_GV_MESSAGE . "\n\n";
+      $gv_email = EMAIL_GV_MESSAGE . "\n\n";
       $content['EMAIL_GV_MESSAGE'] = EMAIL_GV_MESSAGE . '<br />';
 
       if (isset($to_name)) {
@@ -136,12 +151,12 @@ function build_coupon_email()
     if ($coupon_result->EOF) {
        $coupon_result = $db->Execute($coupon_query . $order); 
     }
-    if (!$coupon_result->EOF) {
-       $coupon_result = preview_advance($coupon_result);
+    if ($coupon_result->EOF) {
+       die("You must create some coupons to run this test."); 
     }
-
     $content['COUPON_TEXT_TO_REDEEM'] = TEXT_TO_REDEEM;
     $content['COUPON_TEXT_VOUCHER_IS'] = TEXT_VOUCHER_IS;
+    $html_coupon_help = sprintf(HTML_COUPON_HELP_DATE, zen_date_short($coupon_result->fields['coupon_start_date']), zen_date_short($coupon_result->fields['coupon_expire_date']));
     $content['COUPON_CODE'] = $coupon_result->fields['coupon_code'] . $html_coupon_help;
     $content['COUPON_DESCRIPTION'] =(!empty($coupon_result->fields['coupon_description']) ? $coupon_result->fields['coupon_description'] : '');
     $content['COUPON_TEXT_REMEMBER']  = TEXT_REMEMBER;
@@ -149,8 +164,10 @@ function build_coupon_email()
     $content['CONTACT_US_OFFICE_FROM'] = OFFICE_FROM . ' ' . $last_cust->fields['customers_firstname'] . " " . $last_cust->fields['customers_lastname'] . '<br />' . OFFICE_EMAIL . '(' . $last_cust->fields['customers_email_address'] . ')';
     $message = PREVIEW_COUPON_MSG; 
     $content['EMAIL_MESSAGE_HTML'] = $message; 
+    $content['EMAIL_SALUTATION'] = EMAIL_SALUTATION; 
     $content['EMAIL_FIRST_NAME'] = $last_cust->fields['customers_firstname']; 
     $content['EMAIL_LAST_NAME'] = $last_cust->fields['customers_lastname']; 
+    $content['EMAIL_TO_ADDRESS'] = $last_cust->fields['customers_email_address']; 
     return $content;
 }
 
@@ -161,10 +178,13 @@ function build_order_status_email($module)
     require(DIR_FS_CATALOG_MODULES . zen_get_module_directory('require_languages.php'));
     require(DIR_FS_ADMIN . DIR_WS_LANGUAGES . $_SESSION['language'] . '/orders.php'); 
 
-    $order_query = "SELECT o.orders_id, customers_name, date_purchased, COUNT(osh.orders_id) AS count FROM " . TABLE_ORDERS . " o LEFT JOIN " . TABLE_ORDERS_STATUS_HISTORY . " osh ON o.orders_id = osh.orders_id GROUP BY o.orders_id HAVING count > 2 ORDER BY o.orders_id DESC LIMIT " . PREVIEW_LOOKBACK_COUNT; 
+    $order_query = "SELECT o.orders_id, customers_name, customers_email_address, date_purchased, COUNT(osh.orders_id) AS count FROM " . TABLE_ORDERS . " o LEFT JOIN " . TABLE_ORDERS_STATUS_HISTORY . " osh ON o.orders_id = osh.orders_id GROUP BY o.orders_id HAVING count > 2 ORDER BY o.orders_id DESC LIMIT " . PREVIEW_LOOKBACK_COUNT; 
     $order_list = $db->Execute($order_query); 
     $order_list = preview_advance($order_list);
 
+    if (empty($order_list->fields['orders_id'])) {
+       die("Please create more orders and try again.  Not enough orders yet.");
+    }
     $orders_id = $order_list->fields['orders_id'];
     $osh_list = $db->Execute("SELECT * FROM " . TABLE_ORDERS_STATUS_HISTORY . " WHERE orders_id = " . $orders_id . " ORDER BY orders_status_history_id DESC LIMIT 2"); 
 
@@ -186,7 +206,12 @@ function build_order_status_email($module)
         $status_value_text = sprintf(OSH_EMAIL_TEXT_STATUS_LABEL, $new_orders_status_name);
     }
     $new_orders_status_name = zen_get_orders_status_name($orders_new_status);
+
+    $email_order_message = defined('EMAIL_ORDER_UPDATE_MESSAGE') ? constant('EMAIL_ORDER_UPDATE_MESSAGE') : '';
+    $content['EMAIL_ORDER_UPDATE_MESSAGE'] = $email_order_message;
+    $content['EMAIL_SALUTATION'] = EMAIL_SALUTATION; 
     $content['EMAIL_CUSTOMERS_NAME']    = $order_list->fields['customers_name'];
+    $content['EMAIL_TO_ADDRESS'] = $order_list->fields['customers_email_address']; 
     $content['EMAIL_TEXT_ORDER_NUMBER'] = OSH_EMAIL_TEXT_ORDER_NUMBER . ' ' . $orders_id;
     $content['EMAIL_TEXT_INVOICE_URL']  = '<a href="' . zen_catalog_href_link(FILENAME_CATALOG_ACCOUNT_HISTORY_INFO, "order_id=$orders_id", 'SSL') .'">' . str_replace(':', '', OSH_EMAIL_TEXT_INVOICE_URL) . '</a>';
     $content['EMAIL_TEXT_DATE_ORDERED'] = OSH_EMAIL_TEXT_DATE_ORDERED . ' ' . zen_date_long($order_list->fields['date_purchased']);
@@ -206,10 +231,11 @@ function build_welcome_email()
 
     require(DIR_FS_CATALOG_MODULES . zen_get_module_directory('require_languages.php'));
 
-    $last_cust = $db->Execute("SELECT customers_firstname, customers_lastname FROM " . TABLE_CUSTOMERS . " ORDER BY customers_id DESC LIMIT " . PREVIEW_LOOKBACK_COUNT);
+    $last_cust = $db->Execute("SELECT customers_email_address, customers_firstname, customers_lastname FROM " . TABLE_CUSTOMERS . " ORDER BY customers_id DESC LIMIT " . PREVIEW_LOOKBACK_COUNT);
     $last_cust = preview_advance($last_cust);
 
     $content['EMAIL_SUBJECT'] = EMAIL_SUBJECT;
+    $content['EMAIL_TO_ADDRESS'] = $last_cust->fields['customers_email_address']; 
     $content['EMAIL_CONTACT_OWNER'] = EMAIL_CONTACT;
     $content['EMAIL_WELCOME'] = EMAIL_WELCOME;
     $content['EMAIL_MESSAGE_HTML'] = EMAIL_TEXT;
@@ -231,6 +257,7 @@ function build_checkout_email()
     include(DIR_WS_CLASSES . 'order.php');
     $order = new order($oID);
     $parts = preg_split('/\s+/', $order->customer['name']);
+    $content['EMAIL_SALUTATION'] = EMAIL_SALUTATION; 
     $content['EMAIL_FIRST_NAME'] = '';
     for ($i = 0; $i < (sizeof($parts) - 1); $i++) {
         $content['EMAIL_FIRST_NAME'] .= $parts[$i] . " ";
@@ -250,6 +277,7 @@ function build_checkout_email()
     $content['PRODUCTS_TITLE'] = EMAIL_TEXT_PRODUCTS;
     $content['EMAIL_TEXT_TELEPHONE'] = EMAIL_TEXT_TELEPHONE;
     $content['EMAIL_CUSTOMER_PHONE'] = $order->customer['telephone']; 
+    $content['EMAIL_TO_ADDRESS'] = $order->customer['email_address']; 
     $content['EMAIL_ORDER_MESSAGE'] = EMAIL_ORDER_MESSAGE;
 
     // Order comments?
@@ -272,7 +300,6 @@ function build_checkout_email()
     // OT and cart contents
     $html_ot = '<tr><td class="order-totals-text" align="right" width="100%">' . '&nbsp;' . '</td> ' . "\n" . '<td class="order-totals-num" align="right" nowrap="nowrap">' . '---------' . '</td> </tr>' . "\n";
     for ($i = 0, $n = sizeof($order->totals); $i < $n; $i++) {
-        $email_order .= strip_tags($order->totals[$i]['title']) . ' ' . strip_tags($order->totals[$i]['text']) . "\n";
         $html_ot .= '<tr><td class="order-totals-text" align="right" width="100%">' . $order->totals[$i]['title'] . '</td> ' . "\n" . '<td class="order-totals-num" align="right" nowrap="nowrap">' . ($order->totals[$i]['text']) . '</td> </tr>' . "\n";
     }
     $content['ORDER_TOTALS'] = '<table border="0" width="100%" cellspacing="0" cellpadding="2"> ' . $html_ot . ' </table>';
@@ -319,6 +346,7 @@ function build_back_in_stock_email_larry()
     $bis_product_query = preview_advance($bis_product_query);
     $product_id = $bis_product_query->fields['products_id'];
     $content['CUSTOMERS_NAME'] = "Mr. Prospect";
+    $content['EMAIL_TO_ADDRESS'] = 'prospect@example.org'; 
     $content['PRODUCT_NAME'] = str_replace("<br/>", " ", zen_get_products_name($product_id));
     $content['EMAIL_SUBJECT'] = "Order " . $content['PRODUCT_NAME'] . " now at " . STORE_NAME;
     $content['SPAM_LINK'] = HTTPS_SERVER . DIR_WS_HTTPS_CATALOG . 'index.php?main_page=back_in_stock&bis_id=' . $bis_id;
@@ -351,6 +379,7 @@ function build_back_in_stock_email_ceon()
     $bis_product_query = preview_advance($bis_product_query);
     $product_id = $bis_product_query->fields['products_id'];
     $content['EMAIL_GREETING'] = "Mr. Prospect";
+    $content['EMAIL_TO_ADDRESS'] = 'prospect@example.org'; 
     $content['EMAIL_INTRO_1'] = EMAIL_INTRO_SINGULAR1; 
     $content['EMAIL_INTRO_2'] = EMAIL_INTRO_SINGULAR2; 
     $content['PRODUCTS_DETAIL_TITLE'] = PRODUCTS_DETAIL_TITLE_SINGULAR; 

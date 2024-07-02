@@ -43,12 +43,12 @@ foreach($filesToTest as $val) {
     }
 }
 
-if (file_exists(DIR_FS_CATALOG_LANGUAGES. $_SESSION['language'] . '/' . $template_dir . '/' . FILENAME_EMAIL_EXTRAS)) {
+if (file_exists(DIR_FS_CATALOG_LANGUAGES. $_SESSION['language'] . '/' . $template_dir . '/' . 'lang.' . FILENAME_EMAIL_EXTRAS)) {
   $template_dir_select = $template_dir . '/';
 } else {
   $template_dir_select = '';
 }
-require_once(DIR_FS_CATALOG_LANGUAGES. $_SESSION['language'] . '/' . $template_dir_select . FILENAME_EMAIL_EXTRAS);
+require_once(DIR_FS_CATALOG_LANGUAGES. $_SESSION['language'] . '/' . $template_dir_select . 'lang.' . FILENAME_EMAIL_EXTRAS);
 
 $action = (!empty($_POST['action']) ? $_POST['action'] : ''); 
 if (!empty($action)) {
@@ -144,28 +144,9 @@ if (!empty($action)) {
 <!doctype html public "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html <?php echo HTML_PARAMS; ?>>
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=<?php echo CHARSET; ?>">
-<title><?php echo TITLE; ?></title>
-<link rel="stylesheet" type="text/css" href="includes/stylesheet.css">
-<link rel="stylesheet" type="text/css" href="includes/cssjsmenuhover.css" media="all" id="hoverJS">
-<link rel="stylesheet" type="text/css" href="includes/admin_access.css" />
-<script language="javascript" src="includes/menu.js"></script>
-<script language="javascript" src="includes/general.js"></script>
-<script type="text/javascript">
-  <!--
-  function init()
-  {
-    cssjsmenu('navbar');
-    if (document.getElementById)
-    {
-      var kill = document.getElementById('hoverJS');
-      kill.disabled = true;
-    }
-  }
-  // -->
-</script>
+    <?php require DIR_WS_INCLUDES . 'admin_html_head.php'; ?>
 </head>
-<body onload="init()">
+<body>
 <!-- header //-->
 <?php require(DIR_WS_INCLUDES . 'header.php'); ?>
 <!-- header_eof //-->

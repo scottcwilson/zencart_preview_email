@@ -5,8 +5,6 @@ function build_generic_email($module)
 {
     global $template, $template_dir, $current_page_base, $language_page_directory, $currencies, $db;
 
-    require(DIR_FS_CATALOG_MODULES . zen_get_module_directory('require_languages.php'));
-
     $last_cust = $db->Execute("SELECT customers_firstname, customers_lastname, customers_email_address  FROM " . TABLE_CUSTOMERS . " ORDER BY customers_id DESC LIMIT " . PREVIEW_LOOKBACK_COUNT);
     $last_cust = preview_advance($last_cust);
 
@@ -25,6 +23,9 @@ function build_generic_email($module)
     } else if ($module == 'product_notification') { 
        $content['EMAIL_MESSAGE_HTML'] = PREVIEW_PRODUCT_NOTIFICATION_MSG; 
     } else if ($module == 'password_forgotten') { 
+
+       global $languageLoader;
+       $languageLoader->loadExtraLanguageFiles(DIR_FS_CATALOG . DIR_WS_LANGUAGES,  $_SESSION['language'], 'password_forgotten.php', $template_dir);
        $new_password = zen_create_PADSS_password( (ENTRY_PASSWORD_MIN_LENGTH > 0 ? ENTRY_PASSWORD_MIN_LENGTH : 5) );
        $crypted_password = zen_encrypt_password($new_password);
        $content['EMAIL_MESSAGE_HTML'] = sprintf(EMAIL_PASSWORD_REMINDER_BODY, $new_password); 
@@ -58,14 +59,13 @@ function build_gv_email($module)
 
     // GV_FAQ only defined on catalog side. Fix 
     define('GV_FAQ', TEXT_GV_NAME . ' FAQ'); 
-    require(DIR_FS_CATALOG_MODULES . zen_get_module_directory('require_languages.php'));
-
+    global $languageLoader;
     if ($module == "gv_queue") { 
-       require(DIR_FS_ADMIN . DIR_WS_LANGUAGES . $_SESSION['language'] . '/gv_queue.php'); 
+        $languageLoader->loadExtraLanguageFiles(DIR_FS_CATALOG . DIR_WS_LANGUAGES, $_SESSION['language'], 'gv_queue.php', $template_dir);
     } else if ($module == "gv_mail") {
-       require(DIR_FS_ADMIN . DIR_WS_LANGUAGES . $_SESSION['language'] . '/gv_mail.php'); 
+        $languageLoader->loadExtraLanguageFiles(DIR_FS_CATALOG . DIR_WS_LANGUAGES, $_SESSION['language'], 'gv_mail.php', $template_dir);
     } else if ($module == "gv_send") {
-      require(DIR_FS_CATALOG_LANGUAGES . $_SESSION['language'] . '/gv_send.php'); 
+        $languageLoader->loadExtraLanguageFiles(DIR_FS_CATALOG . DIR_WS_LANGUAGES, $_SESSION['language'], 'gv_send.php', $template_dir);
     }
 
     $last_cust = $db->Execute("SELECT customers_firstname, customers_lastname, customers_email_address  FROM " . TABLE_CUSTOMERS . " ORDER BY customers_id DESC LIMIT " . PREVIEW_LOOKBACK_COUNT);
@@ -138,8 +138,8 @@ function build_coupon_email()
 {
     global $template, $template_dir, $current_page_base, $language_page_directory, $currencies, $db;
 
-    require(DIR_FS_CATALOG_MODULES . zen_get_module_directory('require_languages.php'));
-    require(DIR_FS_ADMIN . DIR_WS_LANGUAGES . $_SESSION['language'] . '/coupon_admin.php'); 
+    global $languageLoader;
+    $languageLoader->loadExtraLanguageFiles(DIR_FS_ADMIN. DIR_WS_LANGUAGES, $_SESSION['language'], 'coupon_admin.php', '/');
 
     $last_cust = $db->Execute("SELECT customers_firstname, customers_lastname, customers_email_address  FROM " . TABLE_CUSTOMERS . " ORDER BY customers_id DESC LIMIT " . PREVIEW_LOOKBACK_COUNT);
     $last_cust = preview_advance($last_cust);
@@ -175,8 +175,8 @@ function build_order_status_email($module)
 {
     global $template, $template_dir, $current_page_base, $language_page_directory, $currencies, $db;
 
-    require(DIR_FS_CATALOG_MODULES . zen_get_module_directory('require_languages.php'));
-    require(DIR_FS_ADMIN . DIR_WS_LANGUAGES . $_SESSION['language'] . '/orders.php'); 
+    global $languageLoader;
+    $languageLoader->loadExtraLanguageFiles(DIR_FS_ADMIN. DIR_WS_LANGUAGES, $_SESSION['language'], 'orders.php', '/');
 
     $order_query = "SELECT o.orders_id, customers_name, customers_email_address, date_purchased, COUNT(osh.orders_id) AS count FROM " . TABLE_ORDERS . " o LEFT JOIN " . TABLE_ORDERS_STATUS_HISTORY . " osh ON o.orders_id = osh.orders_id GROUP BY o.orders_id HAVING count > 2 ORDER BY o.orders_id DESC LIMIT " . PREVIEW_LOOKBACK_COUNT; 
     $order_list = $db->Execute($order_query); 
@@ -229,8 +229,8 @@ function build_welcome_email()
 {
     global $template, $template_dir, $current_page_base, $language_page_directory, $currencies, $db;
 
-    require(DIR_FS_CATALOG_MODULES . zen_get_module_directory('require_languages.php'));
-
+    global $languageLoader;
+    $languageLoader->loadExtraLanguageFiles(DIR_FS_CATALOG . DIR_WS_LANGUAGES,  $_SESSION['language'], 'create_account.php', $template_dir);
     $last_cust = $db->Execute("SELECT customers_email_address, customers_firstname, customers_lastname FROM " . TABLE_CUSTOMERS . " ORDER BY customers_id DESC LIMIT " . PREVIEW_LOOKBACK_COUNT);
     $last_cust = preview_advance($last_cust);
 
@@ -246,9 +246,12 @@ function build_welcome_email()
 
 function build_checkout_email()
 {
-    global $template, $template_dir, $current_page_base, $language_page_directory, $currencies, $db;
+    global $template, $template_dir, $current_page_base, $language_page_directory, $currencies, $db, $zcDate;
 
-    require(DIR_FS_CATALOG_MODULES . zen_get_module_directory('require_languages.php'));
+     global $languageLoader;
+     $languageLoader->loadExtraLanguageFiles(DIR_FS_CATALOG . DIR_WS_LANGUAGES,  $_SESSION['language'], 'checkout_process.php', $template_dir);
+     $languageLoader->loadExtraLanguageFiles(DIR_FS_CATALOG . DIR_WS_LANGUAGES,  $_SESSION['language'], 'email_extras.php', $template_dir);
+     $languageLoader->loadExtraLanguageFiles(DIR_FS_CATALOG . DIR_WS_LANGUAGES,  '', 'english.php', $template_dir);
 
     $last_order = $db->Execute("SELECT orders_id FROM " . TABLE_ORDERS . " ORDER BY orders_id DESC LIMIT " . PREVIEW_LOOKBACK_COUNT);
     $last_order = preview_advance($last_order);
@@ -273,7 +276,7 @@ function build_checkout_email()
     $content['INTRO_ORDER_NUM_TITLE'] = EMAIL_TEXT_ORDER_NUMBER;
     $content['INTRO_ORDER_NUMBER'] = $oID;
     $content['INTRO_DATE_TITLE'] = EMAIL_TEXT_DATE_ORDERED;
-    $content['INTRO_DATE_ORDERED'] = strftime(DATE_FORMAT_LONG);
+    $content['INTRO_DATE_ORDERED'] = $zcDate->output(DATE_FORMAT_LONG);
     $content['PRODUCTS_TITLE'] = EMAIL_TEXT_PRODUCTS;
     $content['EMAIL_TEXT_TELEPHONE'] = EMAIL_TEXT_TELEPHONE;
     $content['EMAIL_CUSTOMER_PHONE'] = $order->customer['telephone']; 
@@ -285,7 +288,7 @@ function build_checkout_email()
         TABLE_ORDERS_STATUS_HISTORY . "
                                  where orders_id = '" . zen_db_input($oID) . "'
                                  ORDER BY date_added ASC LIMIT 1");
-    $content['ORDER_COMMENTS'] = nl2br(zen_db_output($orders_history->fields['comments']));
+    $content['ORDER_COMMENTS'] = nl2br(zen_output_string_protected($orders_history->fields['comments']));
     $content['HEADING_ADDRESS_INFORMATION'] = HEADING_ADDRESS_INFORMATION;
     $content['ADDRESS_DELIVERY_TITLE'] = EMAIL_TEXT_DELIVERY_ADDRESS;
     $content['ADDRESS_DELIVERY_DETAIL'] = zen_address_format($order->delivery['format_id'], $order->delivery, 1, '', '<br />');
@@ -340,7 +343,6 @@ function build_back_in_stock_email_larry()
 {
     global $template, $template_dir, $current_page_base, $language_page_directory, $db, $currencies;
 
-    require(DIR_FS_CATALOG_MODULES . zen_get_module_directory('require_languages.php'));
     include $language_page_directory . "/extra_definitions/back_in_stock.php";
     $bis_product_query = $db->Execute("SELECT products_id FROM " . TABLE_PRODUCTS . " WHERE products_status = 1 ORDER BY products_last_modified DESC LIMIT " . PREVIEW_LOOKBACK_COUNT);
     $bis_product_query = preview_advance($bis_product_query);
@@ -369,7 +371,6 @@ function build_back_in_stock_email_ceon()
 {
     global $template, $template_dir, $current_page_base, $language_page_directory, $db, $currencies;
 
-    require(DIR_FS_CATALOG_MODULES . zen_get_module_directory('require_languages.php'));
     // Pull from admin 
     include "includes/languages/english/back_in_stock_notifications.php";
     // Pull from storefront 
@@ -401,8 +402,6 @@ function build_abandoned_cart_email($drip_number)
     // logic from admin/recover_cart_sales.php 'sendmail' portion
     // new home: includes/functions/extra_functions/abandoned_cart.php,
     global $template, $template_dir, $current_page_base, $language_page_directory, $currencies, $db;
-
-    require(DIR_FS_CATALOG_MODULES . zen_get_module_directory('require_languages.php'));
 
     $cid_query = $db->Execute("SELECT customers_id FROM " . TABLE_CUSTOMERS_BASKET . " ORDER BY customers_basket_date_added DESC LIMIT " . PREVIEW_LOOKBACK_COUNT);
     $cid_query = preview_advance($cid_query);
@@ -491,8 +490,6 @@ function build_abandoned_cart_base_email()
     // logic from admin/recover_cart_sales.php 'sendmail' portion
     // new home: includes/functions/extra_functions/abandoned_cart.php,
     global $template, $template_dir, $current_page_base, $language_page_directory, $currencies, $db;
-
-    require(DIR_FS_CATALOG_MODULES . zen_get_module_directory('require_languages.php'));
 
     $cid_query = $db->Execute("SELECT customers_id FROM " . TABLE_CUSTOMERS_BASKET . " ORDER BY customers_basket_date_added DESC LIMIT " . PREVIEW_LOOKBACK_COUNT);
     $cid_query = preview_advance($cid_query);

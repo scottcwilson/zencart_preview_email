@@ -1,5 +1,5 @@
 Zen Cart Preview Email
-======================
+====================== 
 
 Zen Cart provides HTML formatted emails for a variety of situations - but you have to create your own CSS. This can be time consuming to develop and test. Preview Email allows you to see how emails Zen Cart sends will look directly from your admin panel. It fabricates the fields required by the email using real data from your cart. For example, previewing the Checkout email uses order data from the last 20 checkouts in your cart. 
 

@@ -25,7 +25,7 @@ function build_generic_email($module)
     } else if ($module == 'password_forgotten') { 
 
        global $languageLoader;
-       $languageLoader->loadExtraLanguageFiles(DIR_FS_CATALOG . DIR_WS_LANGUAGES,  $_SESSION['language'], 'password_forgotten.php', $template_dir);
+       $languageLoader->loadExtraLanguageFiles(DIR_FS_CATALOG . DIR_WS_LANGUAGES,  $_SESSION['language'], 'password_forgotten.php', '/');
        $new_password = zen_create_PADSS_password( (ENTRY_PASSWORD_MIN_LENGTH > 0 ? ENTRY_PASSWORD_MIN_LENGTH : 5) );
        $crypted_password = zen_encrypt_password($new_password);
        $content['EMAIL_MESSAGE_HTML'] = sprintf(EMAIL_PASSWORD_REMINDER_BODY, $new_password); 
@@ -61,11 +61,11 @@ function build_gv_email($module)
     define('GV_FAQ', TEXT_GV_NAME . ' FAQ'); 
     global $languageLoader;
     if ($module == "gv_queue") { 
-        $languageLoader->loadExtraLanguageFiles(DIR_FS_CATALOG . DIR_WS_LANGUAGES, $_SESSION['language'], 'gv_queue.php', $template_dir);
+        $languageLoader->loadExtraLanguageFiles(DIR_FS_CATALOG . DIR_WS_LANGUAGES, $_SESSION['language'], 'gv_queue.php', '/');
     } else if ($module == "gv_mail") {
-        $languageLoader->loadExtraLanguageFiles(DIR_FS_CATALOG . DIR_WS_LANGUAGES, $_SESSION['language'], 'gv_mail.php', $template_dir);
+        $languageLoader->loadExtraLanguageFiles(DIR_FS_CATALOG . DIR_WS_LANGUAGES, $_SESSION['language'], 'gv_mail.php', '/');
     } else if ($module == "gv_send") {
-        $languageLoader->loadExtraLanguageFiles(DIR_FS_CATALOG . DIR_WS_LANGUAGES, $_SESSION['language'], 'gv_send.php', $template_dir);
+        $languageLoader->loadExtraLanguageFiles(DIR_FS_CATALOG . DIR_WS_LANGUAGES, $_SESSION['language'], 'gv_send.php', '/');
     }
 
     $last_cust = $db->Execute("SELECT customers_firstname, customers_lastname, customers_email_address  FROM " . TABLE_CUSTOMERS . " ORDER BY customers_id DESC LIMIT " . PREVIEW_LOOKBACK_COUNT);
@@ -230,7 +230,7 @@ function build_welcome_email()
     global $template, $template_dir, $current_page_base, $language_page_directory, $currencies, $db;
 
     global $languageLoader;
-    $languageLoader->loadExtraLanguageFiles(DIR_FS_CATALOG . DIR_WS_LANGUAGES,  $_SESSION['language'], 'create_account.php', $template_dir);
+    $languageLoader->loadExtraLanguageFiles(DIR_FS_CATALOG . DIR_WS_LANGUAGES,  $_SESSION['language'], 'create_account.php', '/');
     $last_cust = $db->Execute("SELECT customers_email_address, customers_firstname, customers_lastname FROM " . TABLE_CUSTOMERS . " ORDER BY customers_id DESC LIMIT " . PREVIEW_LOOKBACK_COUNT);
     $last_cust = preview_advance($last_cust);
 
@@ -249,9 +249,9 @@ function build_checkout_email()
     global $template, $template_dir, $current_page_base, $language_page_directory, $currencies, $db, $zcDate;
 
      global $languageLoader;
-     $languageLoader->loadExtraLanguageFiles(DIR_FS_CATALOG . DIR_WS_LANGUAGES,  $_SESSION['language'], 'checkout_process.php', $template_dir);
-     $languageLoader->loadExtraLanguageFiles(DIR_FS_CATALOG . DIR_WS_LANGUAGES,  $_SESSION['language'], 'email_extras.php', $template_dir);
-     $languageLoader->loadExtraLanguageFiles(DIR_FS_CATALOG . DIR_WS_LANGUAGES,  '', 'english.php', $template_dir);
+     $languageLoader->loadExtraLanguageFiles(DIR_FS_CATALOG . DIR_WS_LANGUAGES,  $_SESSION['language'], 'checkout_process.php', '/');
+     $languageLoader->loadExtraLanguageFiles(DIR_FS_CATALOG . DIR_WS_LANGUAGES,  $_SESSION['language'], 'email_extras.php', '/');
+     $languageLoader->loadExtraLanguageFiles(DIR_FS_CATALOG . DIR_WS_LANGUAGES,  '', 'english.php', '/');
 
     $last_order = $db->Execute("SELECT orders_id FROM " . TABLE_ORDERS . " ORDER BY orders_id DESC LIMIT " . PREVIEW_LOOKBACK_COUNT);
     $last_order = preview_advance($last_order);

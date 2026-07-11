@@ -220,7 +220,7 @@ if (file_exists(DIR_FS_EMAIL_TEMPLATES . 'email_template_abandoned_cart_3.html')
 ?>
 <br />
 <br />
-<button type="submit" class="btn btn-primary"><?= COUPON_BUTTON_PREVIEW ?></button>
+<button type="submit" class="btn btn-primary"><?= BOX_CUSTOMERS_PREVIEW_EMAIL ?></button>
 <br />
 </div>
 </form>

@@ -56,51 +56,51 @@ if (!empty($action)) {
       $current_page_base = 'checkout_process'; 
       $module = 'checkout'; 
       $content = build_checkout_email(); 
-   } else if ($action == 'contact_us') {
+   } elseif ($action == 'contact_us') {
       $current_page_base = 'contact_us'; 
       $module = 'contact_us'; 
       $content = build_generic_email($module); 
-   } else if ($action == 'coupon') {
+   } elseif ($action == 'coupon') {
       $current_page_base = 'coupon'; 
       $module = 'coupon'; 
       $content = build_coupon_email(); 
-   } else if ($action == 'default') {
+   } elseif ($action == 'default') {
       $current_page_base = 'default'; 
       $module = 'default'; 
       $content = build_generic_email($module); 
-   } else if ($action == 'direct') {
+   } elseif ($action == 'direct') {
       $current_page_base = 'direct'; 
       $module = 'direct_email'; 
       $content = build_direct_email($module); 
-   } else if ($action == 'gv_queue') {
+   } elseif ($action == 'gv_queue') {
       $current_page_base = 'gv_queue'; 
       $module = 'gv_queue'; 
       $content = build_gv_email($module); 
-   } else if ($action == 'gv_mail') {
+   } elseif ($action == 'gv_mail') {
       $current_page_base = 'gv_mail'; 
       $module = 'gv_mail'; 
       $content = build_gv_email($module); 
-   } else if ($action == 'gv_send') {
+   } elseif ($action == 'gv_send') {
       $current_page_base = 'gv_send'; 
       $module = 'gv_send'; 
       $content = build_gv_email($module); 
-   } else if ($action == 'order_status') {
+   } elseif ($action == 'order_status') {
       $current_page_base = 'order_status'; 
       $module = 'order_status'; 
       $content = build_order_status_email($module); 
-   } else if ($action == 'product_notification') {
+   } elseif ($action == 'product_notification') {
       $current_page_base = 'product_notification'; 
       $module = 'product_notification'; 
       $content = build_generic_email($module); 
-   } else if ($action == 'password_forgotten') {
+   } elseif ($action == 'password_forgotten') {
       $current_page_base = 'password_forgotten'; 
       $module = 'password_forgotten'; 
       $content = build_generic_email($module); 
-   } else if ($action == "welcome") { 
+   } elseif ($action == "welcome") { 
       $current_page_base = 'create_account'; 
       $module = 'welcome';
       $content = build_welcome_email(); 
-   } else if ($action == 'back_in_stock') {
+   } elseif ($action == 'back_in_stock') {
       $current_page_base = 'back_in_stock_notification'; 
       $module = 'back_in_stock_notification'; 
       if (file_exists('includes/classes/class.CeonBISNInstallOrUpgrade.php')) { 
@@ -108,19 +108,19 @@ if (!empty($action)) {
       } else {
          $content = build_back_in_stock_email_larry(); 
       }
-   } else if ($action == 'abandoned_cart_base') {
+   } elseif ($action == 'abandoned_cart_base') {
       $current_page_base = 'recover_cart_sales'; 
       $module = 'recover_cart_sales'; 
       $content = build_abandoned_cart_base_email(); 
-   } else if ($action == 'abandoned_cart_1') {
+   } elseif ($action == 'abandoned_cart_1') {
       $current_page_base = 'recover_cart_sales'; 
       $module = 'abandoned_cart_1'; 
       $content = build_abandoned_cart_email(1); 
-   } else if ($action == 'abandoned_cart_2') {
+   } elseif ($action == 'abandoned_cart_2') {
       $current_page_base = 'recover_cart_sales'; 
       $module = 'abandoned_cart_2'; 
       $content = build_abandoned_cart_email(2); 
-   } else if ($action == 'abandoned_cart_3') {
+   } elseif ($action == 'abandoned_cart_3') {
       $current_page_base = 'recover_cart_sales'; 
       $module = 'abandoned_cart_3'; 
       $content = build_abandoned_cart_email(3); 
@@ -220,7 +220,7 @@ if (file_exists(DIR_FS_EMAIL_TEMPLATES . 'email_template_abandoned_cart_3.html')
 ?>
 <br />
 <br />
-                <?php echo zen_image_submit('button_preview.gif', BOX_CUSTOMERS_PREVIEW_EMAIL); ?>
+<button type="submit" class="btn btn-primary"><?= COUPON_BUTTON_PREVIEW ?></button>
 <br />
 </div>
 </form>

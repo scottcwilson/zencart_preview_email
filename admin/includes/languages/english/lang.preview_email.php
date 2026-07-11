@@ -1,0 +1,30 @@
+<?php
+$define = [
+    'HEADING_TITLE' => 'Preview Email',
+    'WHICH_EMAIL' => 'Which email would you like to preview?',
+    'CHECKOUT_EMAIL_NAME' => 'Checkout Email',
+    'CONTACT_US_EMAIL_NAME' => 'Contact Us Email',
+    'COUPON_EMAIL_NAME' => 'Coupon Email',
+    'DEFAULT_EMAIL_NAME' => 'Default Email',
+    'DIRECT_EMAIL_NAME' => 'Direct Email',
+    'GV_QUEUE_EMAIL_NAME' => 'GV Queue Email',
+    'GV_MAIL_EMAIL_NAME' => 'GV Mail Email',
+    'GV_SEND_EMAIL_NAME' => 'GV Send Email',
+    'ORDER_STATUS_EMAIL_NAME' => 'Order Status',
+    'PASSWORD_FORGOTTEN_EMAIL_NAME' => 'Password Forgotten',
+    'PRODUCT_NOTIFICATION_EMAIL_NAME' => 'Product Notification',
+    'WELCOME_EMAIL_NAME' => 'Welcome Email',
+    'ABANDONED_CART_EMAIL_NAME' => 'Abandoned Cart',
+    'BACK_IN_STOCK_EMAIL_NAME' => 'Back in Stock',
+    'PREVIEW_CONTACT_US_MSG' => 'Question from customer ... ',
+    'PREVIEW_DEFAULT_MSG' => 'Default message ... ',
+    'PREVIEW_DIRECT_MSG' => 'Direct message ... ',
+    'PREVIEW_GV_MAIL_MSG' => 'GV Mail message ... ',
+    'PREVIEW_GV_SEND_MESSAGE' => 'GV Send message ...',
+    'PREVIEW_PRODUCT_NOTIFICATION_MSG' => 'Product notification message ... ',
+    'PREVIEW_TEST_DIRECT_FILE' => '../direct_test.html',
+    'PREVIEW_COUPON_MSG' => 'This is a test message about a coupon',
+    'PREVIEW_SUBJECT_LINE' => 'Subject Line',
+];
+
+return $define;

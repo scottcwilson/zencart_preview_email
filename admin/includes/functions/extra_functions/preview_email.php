@@ -16,13 +16,13 @@ function build_generic_email($module)
     $content['EMAIL_SUBJECT'] = PREVIEW_SUBJECT_LINE; 
     if ($module == 'contact_us') { 
        $content['EMAIL_MESSAGE_HTML'] = PREVIEW_CONTACT_US_MSG; 
-    } else if ($module == 'default') { 
+    } elseif ($module == 'default') { 
        $content['EMAIL_MESSAGE_HTML'] = PREVIEW_DEFAULT_MSG; 
-    } else if ($module == 'direct') { 
+    } elseif ($module == 'direct') { 
        $content['EMAIL_MESSAGE_HTML'] = PREVIEW_DIRECT_MSG; 
-    } else if ($module == 'product_notification') { 
+    } elseif ($module == 'product_notification') { 
        $content['EMAIL_MESSAGE_HTML'] = PREVIEW_PRODUCT_NOTIFICATION_MSG; 
-    } else if ($module == 'password_forgotten') { 
+    } elseif ($module == 'password_forgotten') { 
 
        global $languageLoader;
        $languageLoader->loadExtraLanguageFiles(DIR_FS_CATALOG . DIR_WS_LANGUAGES,  $_SESSION['language'], 'password_forgotten.php', '/');
@@ -62,9 +62,9 @@ function build_gv_email($module)
     global $languageLoader;
     if ($module == "gv_queue") { 
         $languageLoader->loadExtraLanguageFiles(DIR_FS_CATALOG . DIR_WS_LANGUAGES, $_SESSION['language'], 'gv_queue.php', '/');
-    } else if ($module == "gv_mail") {
+    } elseif ($module == "gv_mail") {
         $languageLoader->loadExtraLanguageFiles(DIR_FS_CATALOG . DIR_WS_LANGUAGES, $_SESSION['language'], 'gv_mail.php', '/');
-    } else if ($module == "gv_send") {
+    } elseif ($module == "gv_send") {
         $languageLoader->loadExtraLanguageFiles(DIR_FS_CATALOG . DIR_WS_LANGUAGES, $_SESSION['language'], 'gv_send.php', '/');
     }
 
@@ -85,7 +85,7 @@ function build_gv_email($module)
        $content['GV_NOTICE_THANKS'] = TEXT_REDEEM_GV_MESSAGE_THANKS;
        $content['TEXT_REDEEM_GV_MESSAGE_BODY'] = TEXT_REDEEM_GV_MESSAGE_BODY;
        $content['TEXT_REDEEM_GV_MESSAGE_FOOTER'] = TEXT_REDEEM_GV_MESSAGE_FOOTER;
-    } else if ($module == "gv_mail") {
+    } elseif ($module == "gv_mail") {
       $id1 = "abcdef12345"; 
       $amount = 1.00;
       $gv_value = 1.00;
@@ -102,7 +102,7 @@ function build_gv_email($module)
          $url = HTTP_CATALOG_SERVER . DIR_WS_CATALOG . 'index.php?main_page=gv_redeem&gv_no='; 
       }
       $content['GV_REDEEM'] = sprintf(TEXT_GV_TO_REDEEM_HTML, $url, $id1);
-    } else if ($module == "gv_send") {
+    } elseif ($module == "gv_send") {
       $id1 = "abcdef12345"; 
       $amount = 1.00; 
       $to_name = "John Doe";
@@ -456,11 +456,11 @@ function build_abandoned_cart_email($drip_number)
       $email .= $basket->fields['fname'] . EMAIL_MESSAGE_1;
       $drip_template = 'abandoned_cart_1';
       $attention_line = ATTENTION_1; 
-   } else if ($drip_number == 2) {
+   } elseif ($drip_number == 2) {
       $email .= $basket->fields['fname'] . EMAIL_MESSAGE_2;
       $drip_template = 'abandoned_cart_2';
       $attention_line = ATTENTION_2; 
-   } else if ($drip_number == 3) {
+   } elseif ($drip_number == 3) {
       $email .= $basket->fields['fname'] . EMAIL_MESSAGE_3;
       $drip_template = 'abandoned_cart_3';
       $attention_line = ATTENTION_3; 
